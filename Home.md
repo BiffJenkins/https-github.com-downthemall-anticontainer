@@ -1,1 +1,1 @@
-Welcome to the anticontainer wiki!
+* [[Writing Plugins]]
