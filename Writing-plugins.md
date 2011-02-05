@@ -1,4 +1,4 @@
-# Introduction
+# Writing Plugins
 AntiContainer plugins are simple [JSON](http://en.wikipedia.org/wiki/JSON) structures describing one of three plugin types.
 
 The _redirector_ and _resolver_ types are relatively easy to master.
