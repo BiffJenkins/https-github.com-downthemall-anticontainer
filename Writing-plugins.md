@@ -13,7 +13,7 @@ _Please note_: Do not manipulate the anticontainer_plugins folder yourself. If y
 
 All existing plugins are available as flat files from [Github](http://github.com/nmaier/anticontainer/tree/master/plugins/)
 
-# Plugins
+# Plugin data
 As noted, plugins are just _JSON_ structures, defining a common set properties.
 
 ## Generic Plugin Properties
@@ -23,13 +23,33 @@ Each plugin must provide the following information
 * `prefix (String)` - Human readable (host) prefix, which might used throughout the user interface
 * `match (String)` - Regular expression which the URL must match in order to have the plugin applied to it.
 
-See also the Generic features applying to all plugin types.
+## Optional Plugin Properties (Options)
+Additionally you may also specify
 
-## Redirectors
+* `priority (Number)` - Higher priority plugins have precedence. Use this, e.g. to strip-of url redirector services.
+* `useServerName (Boolean)` - If the server later proposes a new file name it will taken into account. Per default only the generated name will be used.
+* `sendInitialReferrer (Boolean)` - When set to `true` the request that fetches the container page will include a http referrer if available from the download job.
+* `omitReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and the original download referrer is kept.
+* `generateName (String)` - If the server and URL do not provide a sane file name you may use `generateServerName` as a last resort. A UUID will be generated and the value of generateSeverName appended, i.e. `gSN = ".jpg"` will generate something like `ec8030f7-c20a-464f-9b0e-13a3a9e97384.jpg`
+* `decode (Boolean)` - When set to `true` the fetched string will be URL-decoded before generating the new URL
+* `static (Boolean)` - When set to `true` this indicates that once the final URL that is retrieved is static. If the download is re-started, for example, non-static URLs are resolved again, while static URLs will be kept from the previous run. `static` is implied for _redirector_ plugins, and defaults to `false` for other plugin types.
+* `noFilter (Boolean)` - When set to `true` the plugin will not be considered for automatic filter generation.
+
+Any other properties will be ignored.
+
+## Meta-data
+You may want to provide some information as well.
+
+* `author (String)` - The name of the plugin author to be displayed in the UI.
+* `ns (String)` - Namespace URI. The `prefix` and `ns` properties together form a unique id for the plugin. If omitted the default namespace is used. If two plugins share the same unique id, then the latter will replace (as in physically override) the former.
+* `updateURL (String)` - A url to update the plugin from. This value will be set automatically if the plugin is installed from the web. <sup>(future)</sup>
+
+
+# Redirectors
 
 A _redirector_ is the most simple plugin. It takes an URL and returns a modified URL without loading any pages.
 
-### Required Properties
+## Required Properties
 
 * `pattern (String)` - A regular expression used for the replacement
 * `replacement (String)` - The replacement text
@@ -37,7 +57,7 @@ A _redirector_ is the most simple plugin. It takes an URL and returns a modified
 Have a look at mozilla's [replace() documentation](https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Global_Objects/String/Replace).
 
 
-### Redirector Example
+## Redirector Example
 <pre><code>{
   "type": "redirector",
   "priority": 1,
@@ -50,18 +70,18 @@ Have a look at mozilla's [replace() documentation](https://developer.mozilla.org
 
 This will match anonym.to URLs simply replacing the first part of the url with nothing (effectivly removing it).
 
-##  Resolvers
+#  Resolvers
 
 A _resolver_ is a plugin that will examine the source text of the original URL target (website) and use a regular expression to match a certain part (the URL) and return it. A builder expression will then be used to generate the new URL.
 
-### Required properties:
+## Required Properties
 
 * `finder (String)` - Regular expression to match a certain part of a site. Use grouping to later access the parts of the match only.
 * `builder (String)` - A builder string consists will assemble the new URL. See below.
 
 See mozilla's [RegExp documentation](https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Global_Objects/RegExp) for more information on regular expressions.
 
-### Builders
+## Builders
 Builders use a special syntax to assemble the final URL fragment.
 There is no need that the result of an URL is fully qualified; you may also return relative URLs.
 
@@ -81,14 +101,14 @@ Currently there are three manipulators:
     * Suppose Group is: `{1:'z', 2:'a', 3:'b'}`, then the result is: `z`, as Group[1] is non-empty
 3. *replace*. Replacements with a regular expression
 
-     Example: `{replace:1,some((?=thing|when)),any$}`
+    Example: `{replace:1,some((?=thing|when)),any$}`
 
     Assume Group 1 is: `"some something someone somewhen"`
 
     Then the result is: `"some anything someone anywhen"`
 
 
-### Resolver Example
+## Resolver Example
 <pre><code>{
 	"type": "resolver",
 	"prefix": "bildercache.de",
@@ -98,7 +118,7 @@ Currently there are three manipulators:
 }</code></pre>
 Will look for the finder expression and construct a new URL consisting of the first group (i.e. .*?bild/.*? )
 
-## Sandbox plugins
+# Sandbox plugins
 
 If neither _redirectors_ nor _resolvers_ are powerful enough for your needs then you may resort to the _sandbox_ type plugins.
 With them you're allowed to perform minimalistic operations within a Javascript sandbox.
@@ -118,12 +138,12 @@ Additionally you may define `finder` and `builder` (s.a.) so that `defaultResolv
 
 Please note that sandboxed plugins are still in development and still pretty limited. Also, correctly encoding your function isn't exactly a piece of cake. I prefer coding the function as plain javascript in some html and using the output of uneval().
 
-### Santa's little helper
+## Santa's little helper
 I developed a small helper website that is targeted at developing Sandbox plugins. Does the encoding for you, and things like that.
 
 [AntiContainer Creator](https://code.downthemall.net/accreator/)
 
-### Sandbox contents
+## Sandbox contents
 The sandbox offers the following non-standard methods/properties:
 
 * Properties
@@ -147,14 +167,14 @@ The sandbox offers the following non-standard methods/properties:
  * `makeRequest(url: String, [load: Function(request), error: Function(request), context: Object])`  - Easy access to Request. You may specify load and error callbacks (both are recommended). The callbacks will be called in scope of context or global scope if omitted. responseText will always be set accordingly (before calling the callbacks if any).
 
 
-#### process
+### process
 This function is called directly on the URL. Scope is the global scope of the Sandbox.
 Implement this to provide a more sophisticated redirector or to do some URL fixups before resolving.
 
 Functionally equivalent to the default implementation:
 `makeRequest(baseURL, resolve, resolve);`
 
-#### resolve
+### resolve
 This function is called on the source text. Scope is the global scope of the Sandbox.
 Implement this to provide a more sophisticated resolver.
 
@@ -162,10 +182,10 @@ Functionally equivalent to the default implementation:
 `defaultResolve();`
 
 
-#### Sandbox Examples
+## Sandbox Examples
 _redirector_ and _resolver_ plugins can be re-written as Sandbox plugins (but shouldn't, for performance reasons)
 
-##### Sandbox as Redirector
+### Sandbox as Redirector
 <pre><code>{
 	"type": "sandbox",
 	"prefix": "google.com",
@@ -173,7 +193,7 @@ _redirector_ and _resolver_ plugins can be re-written as Sandbox plugins (but sh
 	"process": "setURL('http://example.com'); finish();"
 }</code></pre>
 
-##### Sandbox as Resolver (1)
+### Sandbox as Resolver (1)
 This one is functionally equivalent to a normal resolver.
 <pre><code>{
 	"type": "sandbox",
@@ -185,7 +205,7 @@ This one is functionally equivalent to a normal resolver.
 	"builder": "{1}"
 }</code></pre>
 
-##### Sandbox as Resolver (2)
+### Sandbox as Resolver (2)
 Will compute the image url using the same function imagefap.com used to call. (Newlines added)
 
 <pre><code>{
@@ -205,8 +225,8 @@ Will compute the image url using the same function imagefap.com used to call. (N
 	finish();"
 }</code></pre>
 
-## Generic Features
-### Cleaners
+# Generic Plugin Features
+## Cleaners
 Redirectors may also "clean" file names. This is handy as a lot of hosts mess with the original file name.
 The cleaners are applied after the default clean, which deletes the first 3 or 5 characters if they are followed by an underliner ('_') or space. 
 `43122_imagelab.jpg -> imagelab.jpg`
@@ -220,33 +240,12 @@ Simply specify a "cleaners" property containing an array of cleaner objects like
 This example defines a single cleaner object which will strip the last 3 characters before the file extension dot.
 `image1ab.jpg -> image.jpg`
 
-## Optional Plugin Properties (Options)
-Additionally you may also specify
-
-* `priority (Number)` - Higher priority plugins have precedence. Use this, e.g. to strip-of url redirector services.
-* `useServerName (Boolean)` - If the server later proposes a new file name it will taken into account. Per default only the generated name will be used.
-* `sendInitialReferrer (Boolean)` - When set to `true` the request that fetches the container page will include a http referrer if available from the download job.
-* `omitReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and the original download referrer is kept.
-* `generateName (String)` - If the server and URL do not provide a sane file name you may use `generateServerName` as a last resort. A UUID will be generated and the value of generateSeverName appended, i.e. `gSN = ".jpg"` will generate something like `ec8030f7-c20a-464f-9b0e-13a3a9e97384.jpg`
-* `decode (Boolean)` - When set to `true` the fetched string will be URL-decoded before generating the new URL
-* `static (Boolean)` - When set to `true` this indicates that once the final URL that is retrieved is static. If the download is re-started, for example, non-static URLs are resolved again, while static URLs will be kept from the previous run. `static` is implied for _redirector_ plugins, and defaults to `false` for other plugin types.
-* `noFilter (Boolean)` - When set to `true` the plugin will not be considered for automatic filter generation.
-
-Any other properties will be ignored.
-
-### Meta-data
-You may want to provide some information as well.
-
-* `author (String)` - The name of the plugin author to be displayed in the UI.
-* `ns (String)` - Namespace URI. The `prefix` and `ns` properties together form a unique id for the plugin. If omitted the default namespace is used. If two plugins share the same unique id, then the latter will replace (as in physically override) the former.
-* `updateURL (String)` - A url to update the plugin from. This value will be set automatically if the plugin is installed from the web. <sup>(future)</sup>
-
 ## Automatic DownThemAll Filter
 AntiContainer will install a DownThemAll! filter with the name "AntiContainer". It is enabled by default.
 
 The matching pattern of this filter will be regenerated on application startup accordingly to the installed filters that do not have `noFilter = false` specified.
 When you add new plugins the AntiContainer filter is not regenerated instantly. Opening the DownThemAll! manager window or DownThemAll! preferences window should trigger an update, as does restarting the application (e.g. Firefox), however.
 
-## Contributing your plugins to AntiContainer
+# Contributing your plugins to AntiContainer
 So you've written a plugin that other AntiContainer users might find useful as well?
 Then please don't hesitate to post a pull request or file an issue.
