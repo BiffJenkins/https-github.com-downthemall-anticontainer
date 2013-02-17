@@ -77,9 +77,13 @@ A _resolver_ is a plugin that will examine the source text of the original URL t
 ## Required Properties
 
 * `finder (String)` - Regular expression to match a certain part of a site. Use grouping to later access the parts of the match only.
-* `builder (String)` - A builder string consists will assemble the new URL. See below.
+* `builder (String)` - A builder string that will assemble the new URL. See below.
 
 See mozilla's [RegExp documentation](https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Global_Objects/RegExp) for more information on regular expressions.
+
+## Optional Properties
+
+* `namer (String)` - A builder string that will assemble the new name. See below.
 
 ## Builders
 Builders use a special syntax to assemble the final URL fragment.
