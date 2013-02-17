@@ -142,11 +142,6 @@ Additionally you may define `finder` and `builder` (s.a.) so that `defaultResolv
 
 Please note that sandboxed plugins are still in development and still pretty limited. Also, correctly encoding your function isn't exactly a piece of cake. I prefer coding the function as plain javascript in some html and using the output of uneval().
 
-## Santa's little helper
-I developed a small helper website that is targeted at developing Sandbox plugins. Does the encoding for you, and things like that.
-
-[AntiContainer Creator](https://code.downthemall.net/accreator/)
-
 ## Sandbox contents
 The sandbox offers the following non-standard methods/properties:
 
