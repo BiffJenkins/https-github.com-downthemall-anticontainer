@@ -29,7 +29,8 @@ Additionally you may also specify
 * `priority (Number)` - Higher priority plugins have precedence. Use this, e.g. to strip-of url redirector services.
 * `useServerName (Boolean)` - If the server later proposes a new file name it will taken into account. Per default only the generated name will be used.
 * `sendInitialReferrer (Boolean)` - When set to `true` the request that fetches the container page will include a http referrer if available from the download job.
-* `omitReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and the original download referrer is kept.
+* `omitReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and left blank.
+* `keepReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and the original download referrer is kept.
 * `generateName (String)` - If the server and URL do not provide a sane file name you may use `generateServerName` as a last resort. A UUID will be generated and the value of generateSeverName appended, i.e. `gSN = ".jpg"` will generate something like `ec8030f7-c20a-464f-9b0e-13a3a9e97384.jpg`
 * `decode (Boolean)` - When set to `true` the fetched string will be URL-decoded before generating the new URL
 * `static (Boolean)` - When set to `true` this indicates that once the final URL that is retrieved is static. If the download is re-started, for example, non-static URLs are resolved again, while static URLs will be kept from the previous run. `static` is implied for _redirector_ plugins, and defaults to `false` for other plugin types.
