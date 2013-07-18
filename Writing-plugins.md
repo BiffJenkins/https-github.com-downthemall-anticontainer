@@ -30,7 +30,7 @@ Additionally you may also specify
 * `useServerName (Boolean)` - If the server later proposes a new file name it will taken into account. Per default only the generated name will be used.
 * `sendInitialReferrer (Boolean)` - When set to `true` the request that fetches the container page will include a http referrer if available from the download job.
 * `omitReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and left blank.
-* `keepReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and the original download referrer is kept.
+* `keepReferrer (Boolean)` - When set to `true` the referrer will NOT be changed to the container page URL and the original download referrer is kept. <sup>(1.2.4)</sup>
 * `generateName (String)` - If the server and URL do not provide a sane file name you may use `generateServerName` as a last resort. A UUID will be generated and the value of generateSeverName appended, i.e. `gSN = ".jpg"` will generate something like `ec8030f7-c20a-464f-9b0e-13a3a9e97384.jpg`
 * `decode (Boolean)` - When set to `true` the fetched string will be URL-decoded before generating the new URL
 * `static (Boolean)` - When set to `true` this indicates that once the final URL that is retrieved is static. If the download is re-started, for example, non-static URLs are resolved again, while static URLs will be kept from the previous run. `static` is implied for _redirector_ plugins, and defaults to `false` for other plugin types.
@@ -59,14 +59,16 @@ Have a look at mozilla's [replace() documentation](https://developer.mozilla.org
 
 
 ## Redirector Example
-<pre><code>{
+```json
+{
   "type": "redirector",
   "priority": 1,
   "prefix": "anonym.to",
   "match": "^http://(.*?)anonym\\.to/\\?",
   "pattern": "^http://(.*?)anonym\\.to/\\?",
   "replacement": ""
-}</code></pre>
+}
+```
 
 
 This will match anonym.to URLs simply replacing the first part of the url with nothing (effectivly removing it).
@@ -84,7 +86,7 @@ See mozilla's [RegExp documentation](https://developer.mozilla.org/En/Core_JavaS
 
 ## Optional Properties
 
-* `namer (String)` - A builder string that will assemble the new name. See below.
+* `namer (String)` - A builder string that will be used as a suggestion for the file name. See below for builder strings. <sup>(1.2.3, DTA-3)</sup>
 
 ## Builders
 Builders use a special syntax to assemble the final URL fragment.
@@ -114,14 +116,17 @@ Currently there are three manipulators:
 
 
 ## Resolver Example
-<pre><code>{
+```json
+{
 	"type": "resolver",
 	"prefix": "bildercache.de",
 	"match": "^http://(?:[\\w\\d]+\\.)?bildercache\\.de/anzeige",
-	"finder": "src=\"(.*?bild/.*?)\"",
-	"builder": "{1}"
-}</code></pre>
-Will look for the finder expression and construct a new URL consisting of the first group (i.e. .*?bild/.*? )
+	"finder": "src=\"(.*?bild/.*?)\" title=\"(.+?)\"",
+	"builder": "{1}",
+	"namer": "{2}"
+}
+```
+Will look for the finder expression and construct a new URL consisting of the first group (i.e. .*?bild/.*? ) and use the second group to suggest a name.
 
 # Sandbox plugins
 
@@ -155,8 +160,8 @@ The sandbox offers the following non-standard methods/properties:
     * `process (void)` - Your process function or the default one.
     * `resolve (void)` - Your resolve function or the default one.
     * `defaultResolve (void)` - The default resolve function
-    * `setURL(url: String)` - (re)sets the URL
-    * `finish(void)` - must be called when done
+    * `setURL(url: String, [nameSuggestion: String])` - (re)sets the URL
+    * `finish(void)` - must be called when done. nameSuggestion<sup>(1.2.4, DTA-3)</sup> is optional.
  * Utility functions
    * `alert(msg)` - The "usual" alert. Use only for fast debugging
    * `log(msg)` - Logs msg using the standard DownThemAll logging facility (will appear in diagnostic logs).
@@ -186,16 +191,19 @@ Functionally equivalent to the default implementation:
 _redirector_ and _resolver_ plugins can be re-written as Sandbox plugins (but shouldn't, for performance reasons)
 
 ### Sandbox as Redirector
-<pre><code>{
+```json
+{
 	"type": "sandbox",
 	"prefix": "google.com",
 	"match": "^http://.*google\\.com/",
-	"process": "setURL('http://example.com'); finish();"
-}</code></pre>
+	"process": "setURL('http://example.com', 'myfile.ext'); finish();"
+}
+```
 
 ### Sandbox as Resolver (1)
 This one is functionally equivalent to a normal resolver.
-<pre><code>{
+```json
+{
 	"type": "sandbox",
 	"prefix": "bayimg.com",
 	"match": "^http://(?:[\\w\\d]+\\.)?bayimg\\.com/(?!image)",
@@ -203,12 +211,14 @@ This one is functionally equivalent to a normal resolver.
 	"resolve": "defaultResolve();",
 	"finder": "src=\"(.+?)\".*?id=\"mainImage\"",
 	"builder": "{1}"
-}</code></pre>
+}
+```
 
 ### Sandbox as Resolver (2)
 Will compute the image url using the same function imagefap.com used to call. (Newlines added)
 
-<pre><code>{
+```json
+{
 	"type": "sandbox",
 	"prefix": "imagefap.com",
 	"match": "^http://.*imagefap\\.com/image\\.php",
@@ -223,7 +233,8 @@ Will compute the image url using the same function imagefap.com used to call. (N
 		setURL(lD(m[1]));
 	}
 	finish();"
-}</code></pre>
+}
+```
 
 # Generic Plugin Features
 ## Cleaners
@@ -232,10 +243,12 @@ The cleaners are applied after the default clean, which deletes the first 3 or 5
 `43122_imagelab.jpg -> imagelab.jpg`
 
 Simply specify a "cleaners" property containing an array of cleaner objects like so:
-<pre><code>"cleaners": [{
+```json
+"cleaners": [{
 	"pattern": "[\\w\\d]{3}\\.(\\w+)$",
 	"replacement": ".$1"
-}]</code></pre>
+}]
+```
 
 This example defines a single cleaner object which will strip the last 3 characters before the file extension dot.
 `image1ab.jpg -> image.jpg`
