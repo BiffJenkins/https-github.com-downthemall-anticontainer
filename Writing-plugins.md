@@ -11,7 +11,7 @@ You should prefer _redirector_ and _resolver_ if possible.
 
 _Please note_: Do not manipulate the anticontainer_plugins folder yourself. If you do, your plugins might still work, but you cannot uninstall those plugins from the interface.
 
-All existing plugins are available as flat files from [Github](http://github.com/nmaier/anticontainer/tree/master/plugins/)
+All existing plugins are available as flat files from [Github](https://github.com/downthemall/anticontainer/tree/master/plugins/)
 
 # Plugin data
 As noted, plugins are just _JSON_ structures, defining a common set properties.
@@ -55,7 +55,7 @@ A _redirector_ is the most simple plugin. It takes an URL and returns a modified
 * `pattern (String)` - A regular expression used for the replacement
 * `replacement (String)` - The replacement text
 
-Have a look at mozilla's [replace() documentation](https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Global_Objects/String/Replace).
+Have a look at mozilla's [replace() documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace).
 
 
 ## Redirector Example
@@ -71,7 +71,7 @@ Have a look at mozilla's [replace() documentation](https://developer.mozilla.org
 ```
 
 
-This will match anonym.to URLs simply replacing the first part of the url with nothing (effectivly removing it).
+This will match anonym.to URLs simply replacing the first part of the url with nothing (effectively removing it).
 
 #  Resolvers
 
@@ -82,7 +82,7 @@ A _resolver_ is a plugin that will examine the source text of the original URL t
 * `finder (String)` - Regular expression to match a certain part of a site. Use grouping to later access the parts of the match only.
 * `builder (String)` - A builder string that will assemble the new URL. See below.
 
-See mozilla's [RegExp documentation](https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Global_Objects/RegExp) for more information on regular expressions.
+See mozilla's [RegExp documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) for more information on regular expressions.
 
 ## Optional Properties
 
